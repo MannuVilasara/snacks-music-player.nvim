@@ -2,6 +2,10 @@
 
 A minimal, beautiful music player UI for Neovim using [folke/snacks.nvim](https://github.com/folke/snacks.nvim) and [playerctl](https://github.com/altdesktop/playerctl).
 
+## 📹 Preview
+
+<img width="614" height="287" alt="image" src="https://github.com/user-attachments/assets/f9ded456-6131-4262-8d43-4a0fcdd26af7" />
+
 ## ✨ Features
 
 - 🎨 Clean horizontal UI with centered content
