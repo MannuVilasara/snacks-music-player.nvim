@@ -169,13 +169,22 @@ function M.update_ui()
 	local ns = vim.api.nvim_create_namespace("music_player")
 	vim.api.nvim_buf_clear_namespace(M.win.buf, ns, 0, -1)
 
-	-- Highlight borders
+	-- Highlight borders only (first and last character of each line)
 	for i = 0, #lines - 1 do
-		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerBorder", i, 0, -1)
+		local line = lines[i + 1]
+		-- First character (left border)
+		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerBorder", i, 0, vim.fn.strwidth(line:sub(1, 1)))
+		-- Last character (right border)
+		local last_char_start = #line - vim.fn.strwidth(line:sub(#line, #line))
+		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerBorder", i, last_char_start, -1)
+		-- Horizontal borders (lines with ═)
+		if line:match("═") then
+			vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerBorder", i, 0, -1)
+		end
 	end
 
-	-- Highlight track info (line 2, 0-indexed)
-	vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerTitle", 2, 0, -1)
+	-- Highlight track info (line 2, 0-indexed) - only content between borders
+	vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerTitle", 2, 1, -2)
 
 	-- Highlight progress bar (line 6)
 	local prog_line = 6
@@ -186,18 +195,18 @@ function M.update_ui()
 	
 	if bar_start and bar_end then
 		-- Highlight time before progress bar
-		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerTime", prog_line, 0, bar_start - 1)
+		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerTime", prog_line, 1, bar_start - 1)
 		-- Highlight progress bar
 		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerProgress", prog_line, bar_start - 1, bar_end - 1)
 		-- Highlight time after progress bar
 		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerTime", prog_line, bar_end - 1, bar_end + 5)
 		-- Highlight status icon
 		local status_hl = info.status == "Playing" and "MusicPlayerPlaying" or "MusicPlayerPaused"
-		vim.api.nvim_buf_add_highlight(M.win.buf, ns, status_hl, prog_line, bar_end + 5, -1)
+		vim.api.nvim_buf_add_highlight(M.win.buf, ns, status_hl, prog_line, bar_end + 5, #prog_text - 1)
 	end
 
-	-- Highlight controls (line 10)
-	vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerControls", 10, 0, -1)
+	-- Highlight controls (line 10) - only content between borders
+	vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerControls", 10, 1, -2)
 end
 
 -- Toggle music player UI
