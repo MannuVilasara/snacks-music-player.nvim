@@ -47,7 +47,7 @@ brew install playerctl
 
 ```lua
 {
-  "MannuVilasara/snacks-music-player.nvim",  -- Replace with your GitHub username
+  "MannuVilasara/snacks-music-player.nvim",
   dependencies = { "folke/snacks.nvim" },
   opts = {},
   keys = {
