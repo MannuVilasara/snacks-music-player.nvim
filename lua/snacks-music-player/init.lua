@@ -72,6 +72,27 @@ function M.create_progress_bar(current, total, width)
 	return string.rep("━", filled) .. "╸" .. string.rep("─", empty)
 end
 
+-- Helper function to truncate string if too long
+local function truncate_string(str, max_width)
+	local len = vim.fn.strwidth(str)
+	if len <= max_width then
+		return str
+	end
+	-- Truncate and add ellipsis
+	local truncated = ""
+	local current_len = 0
+	for i = 1, #str do
+		local char = str:sub(i, i)
+		local char_width = vim.fn.strwidth(char)
+		if current_len + char_width + 3 > max_width then -- +3 for "..."
+			break
+		end
+		truncated = truncated .. char
+		current_len = current_len + char_width
+	end
+	return truncated .. "..."
+end
+
 -- Helper function to pad string to exact width (center align)
 local function pad_center(str, width)
 	local len = vim.fn.strwidth(str)
@@ -101,6 +122,8 @@ function M.update_ui()
 	local title = info.title ~= "Unknown" and info.title or "No Track"
 	local artist = info.artist ~= "Unknown" and info.artist or "Unknown Artist"
 	local track = title .. " - " .. artist
+	-- Truncate if too long to fit in the window
+	track = truncate_string(track, w)
 	table.insert(lines, "║" .. pad_center(track, w) .. "║")
 
 	table.insert(lines, "║" .. string.rep(" ", w) .. "║")
