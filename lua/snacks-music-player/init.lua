@@ -7,6 +7,16 @@ M.config = {
 	backdrop = 60,
 	update_interval = 1000,
 	progress_bar_width = 38,
+	colors = {
+		border = "FloatBorder",
+		title = "Title",
+		artist = "Comment",
+		progress_bar = "String",
+		time = "Number",
+		controls = "Special",
+		status_playing = "String",
+		status_paused = "WarningMsg",
+	},
 }
 
 M.win = nil
@@ -154,6 +164,40 @@ function M.update_ui()
 	vim.bo[M.win.buf].modifiable = true
 	vim.api.nvim_buf_set_lines(M.win.buf, 0, -1, false, lines)
 	vim.bo[M.win.buf].modifiable = false
+
+	-- Apply syntax highlighting
+	local ns = vim.api.nvim_create_namespace("music_player")
+	vim.api.nvim_buf_clear_namespace(M.win.buf, ns, 0, -1)
+
+	-- Highlight borders
+	for i = 0, #lines - 1 do
+		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerBorder", i, 0, -1)
+	end
+
+	-- Highlight track info (line 2, 0-indexed)
+	vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerTitle", 2, 0, -1)
+
+	-- Highlight progress bar (line 6)
+	local prog_line = 6
+	local prog_text = lines[prog_line + 1]
+	-- Find the position of the progress bar
+	local bar_start = prog_text:find("━") or prog_text:find("─")
+	local bar_end = prog_text:find(icon, 1, true)
+	
+	if bar_start and bar_end then
+		-- Highlight time before progress bar
+		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerTime", prog_line, 0, bar_start - 1)
+		-- Highlight progress bar
+		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerProgress", prog_line, bar_start - 1, bar_end - 1)
+		-- Highlight time after progress bar
+		vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerTime", prog_line, bar_end - 1, bar_end + 5)
+		-- Highlight status icon
+		local status_hl = info.status == "Playing" and "MusicPlayerPlaying" or "MusicPlayerPaused"
+		vim.api.nvim_buf_add_highlight(M.win.buf, ns, status_hl, prog_line, bar_end + 5, -1)
+	end
+
+	-- Highlight controls (line 10)
+	vim.api.nvim_buf_add_highlight(M.win.buf, ns, "MusicPlayerControls", 10, 0, -1)
 end
 
 -- Toggle music player UI
@@ -254,6 +298,16 @@ end
 -- Setup function for configuration
 function M.setup(opts)
 	M.config = vim.tbl_deep_extend("force", M.config, opts or {})
+	
+	-- Define custom highlight groups
+	vim.api.nvim_set_hl(0, "MusicPlayerBorder", { link = M.config.colors.border })
+	vim.api.nvim_set_hl(0, "MusicPlayerTitle", { link = M.config.colors.title })
+	vim.api.nvim_set_hl(0, "MusicPlayerArtist", { link = M.config.colors.artist })
+	vim.api.nvim_set_hl(0, "MusicPlayerProgress", { link = M.config.colors.progress_bar })
+	vim.api.nvim_set_hl(0, "MusicPlayerTime", { link = M.config.colors.time })
+	vim.api.nvim_set_hl(0, "MusicPlayerControls", { link = M.config.colors.controls })
+	vim.api.nvim_set_hl(0, "MusicPlayerPlaying", { link = M.config.colors.status_playing })
+	vim.api.nvim_set_hl(0, "MusicPlayerPaused", { link = M.config.colors.status_paused })
 end
 
 return M
