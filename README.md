@@ -9,6 +9,8 @@ A minimal, beautiful music player UI for Neovim using [folke/snacks.nvim](https:
 ## ✨ Features
 
 - 🎨 Clean horizontal UI with centered content
+- 🌈 Customizable colors with highlight groups
+- ✂️ Automatic truncation of long song names
 - ⏱️ Real-time progress bar that updates every second
 - 🎮 Keyboard controls for play/pause, next, previous
 - 🎵 Shows current track, artist, and playback status
@@ -76,6 +78,18 @@ brew install playerctl
 
     -- Progress bar width
     progress_bar_width = 38,
+
+    -- Color configuration (uses Neovim highlight groups)
+    colors = {
+      border = "FloatBorder",           -- Border color
+      title = "Title",                  -- Song title color
+      artist = "Comment",               -- Artist name color
+      progress_bar = "String",          -- Progress bar color
+      time = "Number",                  -- Time display color
+      controls = "Special",             -- Controls text color
+      status_playing = "String",        -- Playing icon color
+      status_paused = "WarningMsg",     -- Paused icon color
+    },
   },
   keys = {
     { "<leader>mp", function() require("snacks-music-player").toggle() end, desc = "Toggle Music Player" },
@@ -131,12 +145,57 @@ local info = player.get_track_info()
 
 ## 🎨 Customization
 
-You can customize the appearance by overriding highlight groups in your colorscheme or init.lua:
+### Color Customization
+
+You can customize colors by providing different highlight groups in the configuration:
 
 ```lua
-vim.api.nvim_set_hl(0, "SnacksMusicPlayerBorder", { fg = "#89b4fa" })
-vim.api.nvim_set_hl(0, "SnacksMusicPlayerTitle", { fg = "#cdd6f4", bold = true })
+require("snacks-music-player").setup({
+  colors = {
+    border = "FloatBorder",
+    title = "String",              -- Make title green
+    artist = "Comment",            -- Make artist gray
+    progress_bar = "Function",     -- Make progress bar cyan
+    time = "Number",               -- Make time orange
+    controls = "Keyword",          -- Make controls purple
+    status_playing = "DiagnosticOk",    -- Green when playing
+    status_paused = "DiagnosticWarn",   -- Yellow when paused
+  }
+})
 ```
+
+### Custom Colors with RGB
+
+You can also define your own custom highlight groups:
+
+```lua
+-- Define custom highlights
+vim.api.nvim_set_hl(0, "MyMusicTitle", { fg = "#ff79c6", bold = true })
+vim.api.nvim_set_hl(0, "MyMusicProgress", { fg = "#50fa7b" })
+vim.api.nvim_set_hl(0, "MyMusicBorder", { fg = "#89b4fa" })
+
+-- Use them in the config
+require("snacks-music-player").setup({
+  colors = {
+    border = "MyMusicBorder",
+    title = "MyMusicTitle",
+    progress_bar = "MyMusicProgress",
+  }
+})
+```
+
+### Available Color Options
+
+| Option           | Description         | Default       |
+| ---------------- | ------------------- | ------------- |
+| `border`         | Border color        | `FloatBorder` |
+| `title`          | Song title color    | `Title`       |
+| `artist`         | Artist name color   | `Comment`     |
+| `progress_bar`   | Progress bar color  | `String`      |
+| `time`           | Time display color  | `Number`      |
+| `controls`       | Controls text color | `Special`     |
+| `status_playing` | Playing icon color  | `String`      |
+| `status_paused`  | Paused icon color   | `WarningMsg`  |
 
 ## 🔧 Supported Music Players
 
